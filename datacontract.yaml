@@ -1,0 +1,97 @@
+# Data contract for the orders table — extension exercise #3 (ODCS-flavored).
+#
+# ODCS = Open Data Contract Standard (Bitol). This is the producer↔consumer
+# "hợp đồng" for the orders dataset: it declares the schema and the quality rules
+# the data MUST satisfy before any consumer (BI, model, the Silver transform)
+# trusts it. It is the single source of truth that pipeline/validate.py enforces.
+#
+# Why it matters: the Pandera gate (pipeline/validate.py ORDER_SCHEMA) enforces
+# these rules at runtime, but it lives in code only the producer reads. A data
+# contract is the SHARED, versioned artifact a consumer can read, diff, and gate
+# CI on — so schema drift becomes a reviewable pull request, not a 3am incident.
+#
+# Verify (zero-key): bonus/test_data_contract.py proves this contract and the
+# enforced Pandera gate flag the SAME bad rows — i.e. the contract has not drifted
+# away from what is actually enforced.
+#
+# Lint / test with the datacontract CLI (optional, needs `pip install datacontract-cli`):
+#   datacontract lint datacontract.yaml
+# CI step (e.g. GitHub Actions): run the lint above + `pytest bonus/test_data_contract.py`
+# on every PR that touches data/ or the schema, and fail the build on drift.
+
+apiVersion: v3.0.0
+kind: DataContract
+id: day17-orders
+name: orders
+version: 1.0.0
+status: active
+domain: ecommerce
+dataProduct: orders
+description:
+  purpose: Cleaned, typed, deduplicated customer orders (the Silver layer).
+  usage: Feeds the Gold daily-revenue aggregates and any downstream model/BI.
+  limitations: One row per order_id after dedup; bad rows are quarantined, not fixed.
+
+schema:
+  - name: orders
+    physicalName: silver_orders
+    physicalType: table
+    description: One validated, deduplicated order per row.
+    properties:
+      - name: order_id
+        logicalType: integer
+        physicalType: integer
+        description: Natural key. Unique after dedup on latest created_at.
+        required: true
+        unique: true
+        primaryKey: true
+        quality:
+          - rule: minimum
+            description: order_id must be a positive integer.
+            mustBeGreaterThan: 0
+      - name: user_id
+        logicalType: string
+        physicalType: varchar
+        description: Owning customer id. Never empty.
+        required: true
+        quality:
+          - rule: minLength
+            description: must be a non-empty string.
+            value: 1
+      - name: product
+        logicalType: string
+        physicalType: varchar
+        description: Product name.
+        required: true
+      - name: amount
+        logicalType: number
+        physicalType: double
+        description: Order value in the account currency. Strictly positive.
+        required: true
+        quality:
+          - rule: minimum
+            description: amount must be greater than zero.
+            mustBeGreaterThan: 0
+      - name: status
+        logicalType: string
+        physicalType: varchar
+        description: Order lifecycle status, from a closed vocabulary.
+        required: true
+        quality:
+          - rule: validValues
+            description: status must be one of the known set.
+            validValues: [completed, pending, refunded, cancelled]
+      - name: created_at
+        logicalType: date
+        physicalType: varchar
+        description: Order creation date (ISO yyyy-mm-dd).
+        required: true
+
+# Dataset-level quality expectations (checked downstream / in CI).
+quality:
+  - rule: uniqueKey
+    description: No duplicate order_id survives the Silver dedup.
+    properties: [order_id]
+  - rule: rowCountAtLeast
+    description: Sanity floor — an empty Silver table means upstream broke.
+    value: 1

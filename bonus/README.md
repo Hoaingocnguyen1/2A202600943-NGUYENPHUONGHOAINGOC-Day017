@@ -11,7 +11,9 @@ Phiên brainstorm + prototype cho bài toán **KG hỏi-đáp văn bản pháp l
 | `data/nd_giao_thong_sample.md` | Corpus *cố ý bẩn* (OCR-like, Điều→Khoản→Điểm lồng, dẫn chiếu chéo) |
 | `data/hieu_luc.csv` | Bảng hiệu lực do người curate (cho ASOF point-in-time) |
 | `test_legal_kg.py` | Test cho prototype legal-KG |
-| `test_extensions.py` | Test cho extension exercise (fuzzy decontamination trong `pipeline/dataset.py`) |
+| `test_extensions.py` | Test cho extension #0 (fuzzy decontamination trong `pipeline/dataset.py`) |
+| `test_data_contract.py` | Test cho extension #3 — chứng minh `../datacontract.yaml` không drift khỏi gate Pandera |
+| `../datacontract.yaml` | Data contract chuẩn ODCS cho bảng orders (extension #3) |
 
 ## Chạy
 
@@ -19,6 +21,9 @@ Phiên brainstorm + prototype cho bài toán **KG hỏi-đáp văn bản pháp l
 python bonus/legal_kg.py        # demo: multi-hop dẫn chiếu + point-in-time hiệu lực
 python -m pytest bonus -q       # chạy test bonus (nằm ngoài tests/ nên không đụng "18 passed" của core)
 ```
+
+> Test data contract cần `pip install pyyaml`. Lint contract bằng CLI (tùy chọn):
+> `pip install datacontract-cli && datacontract lint datacontract.yaml`.
 
 ## Hai quyết định cốt lõi prototype minh hoạ
 
