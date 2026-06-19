@@ -1,0 +1,4 @@
+# URLs to crawl -> Markdown -> Bronze -> RAG/KG. One per line; '#' = comment.
+# Replace these with your real sources. Respect each site's robots.txt / ToS.
+https://vi.wikipedia.org/wiki/Tr%C3%AD_tu%E1%BB%87_nh%C3%A2n_t%E1%BA%A1o
+https://vi.wikipedia.org/wiki/H%E1%BB%8Dc_m%C3%A1y

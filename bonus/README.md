@@ -14,6 +14,8 @@ Phiên brainstorm + prototype cho bài toán **KG hỏi-đáp văn bản pháp l
 | `test_extensions.py` | Test cho extension #0 (fuzzy decontamination trong `pipeline/dataset.py`) |
 | `test_data_contract.py` | Test cho extension #3 — chứng minh `../datacontract.yaml` không drift khỏi gate Pandera |
 | `../datacontract.yaml` | Data contract chuẩn ODCS cho bảng orders (extension #3) |
+| `crawl.py` | Stage ingest: crawl URL (từ `../data/urls.txt`) → markdown (trafilatura) → Bronze → RAG/KG sẵn có; idempotent theo content-hash |
+| `test_crawl.py` | Test crawl OFFLINE (fake fetch, không cần mạng) |
 
 ## Chạy
 
@@ -24,6 +26,20 @@ python -m pytest bonus -q       # chạy test bonus (nằm ngoài tests/ nên kh
 
 > Test data contract cần `pip install pyyaml`. Lint contract bằng CLI (tùy chọn):
 > `pip install datacontract-cli && datacontract lint datacontract.yaml`.
+
+### Crawl stage (URL → Markdown → Bronze → RAG/KG)
+
+```bash
+pip install -r requirements-crawl.txt    # trafilatura, zero-key
+# sửa data/urls.txt (1 URL / dòng) rồi:
+python bonus/crawl.py                     # hoặc: python bonus/crawl.py path/to/urls.txt
+```
+
+Crawl giữ HTML thô vào Bronze (`crawl_warehouse.duckdb`), ghi markdown vào
+`data/crawled/`, rồi chạy `embed.py`/`kg.py` trên đó. **Idempotent**: chạy lần 2
+bỏ qua doc không đổi (content-hash) — chạy lại/backfill an toàn, không nhân đôi.
+Markdown crawl đổ vào `data/crawled/` (KHÔNG phải `data/docs/`) để không phá
+fixtures của `verify.py`/`kg_demo`.
 
 ## Hai quyết định cốt lõi prototype minh hoạ
 

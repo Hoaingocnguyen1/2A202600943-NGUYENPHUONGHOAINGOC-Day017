@@ -1,0 +1,4 @@
+# Bonus crawl stage (bonus/crawl.py) — zero-key, no API.
+#   pip install -r requirements-crawl.txt
+# trafilatura fetches + extracts main web content as Markdown (output_format="markdown").
+trafilatura>=1.12

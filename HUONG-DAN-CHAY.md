@@ -47,6 +47,18 @@ Kỳ vọng: in ra 10 cạnh dẫn chiếu/sửa đổi (3 văn bản), chuỗi 
 
 Đọc thiết kế: `bonus/DESIGN.md`. Chi tiết: `bonus/README.md`.
 
+### Crawl URL → Markdown → Bronze → RAG/KG
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install -r requirements-crawl.txt   # trafilatura
+# sửa data\urls.txt (1 URL / dòng), rồi:
+.\.venv\Scripts\python.exe bonus\crawl.py
+```
+
+Kỳ vọng: crawl URL → giữ HTML thô vào Bronze (`crawl_warehouse.duckdb`) + ghi
+`data\crawled\*.md` → embed RAG. Chạy lần 2: `skipped` = số doc không đổi
+(idempotent, không nhân đôi).
+
 ---
 
 ## 3. Chạy test
@@ -55,8 +67,8 @@ Kỳ vọng: in ra 10 cạnh dẫn chiếu/sửa đổi (3 văn bản), chuỗi 
 # Test core (phần chấm điểm) — kỳ vọng: 18 passed
 .\.venv\Scripts\python.exe -m pytest -q
 
-# Test bonus (legal-KG + fuzzy decontamination) — kỳ vọng: 8 passed
-.\.venv\Scripts\python.exe -m pytest bonus\test_legal_kg.py bonus\test_extensions.py -q --override-ini="addopts="
+# Test bonus (legal-KG + fuzzy decon + data contract + crawl) — kỳ vọng: 14 passed
+.\.venv\Scripts\python.exe -m pytest bonus\test_legal_kg.py bonus\test_extensions.py bonus\test_data_contract.py bonus\test_crawl.py -q --override-ini="addopts="
 ```
 
 > Lưu ý: `pytest.ini` mặc định gom thư mục `tests/`. Lệnh bonus dùng
