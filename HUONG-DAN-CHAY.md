@@ -67,8 +67,8 @@ Kỳ vọng: crawl URL → giữ HTML thô vào Bronze (`crawl_warehouse.duckdb`
 # Test core (phần chấm điểm) — kỳ vọng: 18 passed
 .\.venv\Scripts\python.exe -m pytest -q
 
-# Test bonus (legal-KG + fuzzy decon + data contract + crawl) — kỳ vọng: 14 passed
-.\.venv\Scripts\python.exe -m pytest bonus\test_legal_kg.py bonus\test_extensions.py bonus\test_data_contract.py bonus\test_crawl.py -q --override-ini="addopts="
+# Test bonus (legal-KG + 5 extension #0-#4 + crawl) — kỳ vọng: 21 passed
+.\.venv\Scripts\python.exe -m pytest bonus -q --override-ini="addopts="
 ```
 
 > Lưu ý: `pytest.ini` mặc định gom thư mục `tests/`. Lệnh bonus dùng

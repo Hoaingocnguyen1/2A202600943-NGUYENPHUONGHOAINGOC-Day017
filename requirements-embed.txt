@@ -1,0 +1,4 @@
+# Bonus ext #1 (bonus/embed_real.py) — real local embeddings, zero API key.
+#   pip install -r requirements-embed.txt
+# Large (pulls torch); the module falls back to the lab's hash embedder if absent.
+sentence-transformers>=2.7

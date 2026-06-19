@@ -15,7 +15,11 @@ Phiên brainstorm + prototype cho bài toán **KG hỏi-đáp văn bản pháp l
 | `test_data_contract.py` | Test cho extension #3 — chứng minh `../datacontract.yaml` không drift khỏi gate Pandera |
 | `../datacontract.yaml` | Data contract chuẩn ODCS cho bảng orders (extension #3) |
 | `crawl.py` | Stage ingest: crawl URL (từ `../data/urls.txt`) → markdown (trafilatura) → Bronze → RAG/KG sẵn có; idempotent theo content-hash |
+| `kg_llm.py` | Extension #2 — trích KG bằng LLM (Claude, structured outputs) + entity resolution; fallback regex khi không có key |
+| `embed_real.py` | Extension #1 — embeddings thật (sentence-transformers) + re-embed tăng dần theo content-hash; fallback hash embedder |
+| `backfill.py` | Extension #4 — backfill idempotent theo cửa sổ `--date`; chạy lại không nhân đôi |
 | `test_crawl.py` | Test crawl OFFLINE (fake fetch, không cần mạng) |
+| `test_more_extensions.py` | Test ext #1/#2/#4 OFFLINE (LLM giả lập, hash embedder, CSV local) |
 
 ## Chạy
 
@@ -51,8 +55,20 @@ fixtures của `verify.py`/`kg_demo`.
    bản mới nhất = phạt hồi tố = sai luật. Đây là training-serving skew của lab, đặt
    vào nơi sai sót là một công dân bị phạt oan.
 
-## Extension exercise kèm theo
+## Extension exercises kèm theo
 
-`pipeline/dataset.decontaminate_fuzzy` (README ext. #0): decontamination khớp
-n-gram, bắt được prompt eval bị *viết lại* mà `decontaminate` exact-match bỏ lọt.
-Xem `test_extensions.py`.
+Toàn bộ 5 bài extension trong README chính (đều zero-key by default):
+
+| # | Ở đâu | Làm gì |
+|---|---|---|
+| #0 | `pipeline/dataset.decontaminate_fuzzy` + `test_extensions.py` | Fuzzy decontamination (n-gram) bắt prompt eval bị viết lại |
+| #1 | `embed_real.py` + `requirements-embed.txt` | Embeddings thật + re-embed tăng dần theo content-hash |
+| #2 | `kg_llm.py` | Trích KG bằng LLM (Claude) + entity resolution |
+| #3 | `../datacontract.yaml` + `test_data_contract.py` | Data contract ODCS + test chống drift |
+| #4 | `backfill.py` | Backfill idempotent theo `--date` |
+
+```bash
+python bonus/kg_llm.py        # cần ANTHROPIC_API_KEY cho LLM thật, không thì fallback regex
+python bonus/embed_real.py    # cần `pip install -r requirements-embed.txt` cho model thật
+python bonus/backfill.py --date 2026-06-01
+```
